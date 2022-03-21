@@ -25,6 +25,20 @@ RULES :
 5. For bonus points: ensure that your solution always invites the main ruler.
 """
 
+class Node:
+    def __init__(self, name, ruler, party_animal_score):
+        self.name = name
+        self.ruler = ruler
+        self.score = party_animal_score
+        self.children = []
+    
+    def addChildren(self, x):
+        self.children.append(x)
+    
+    def calculateChildrenScore(self):
+        score_sum = [x.score for x in self.children]
+        return sum(score_sum)
+
 def _getName(x):
     "Get the name of particular animal"
     return x["name"]
@@ -37,23 +51,41 @@ def _getPartyScore(x):
     "Get the arty score of particular animal"
     return x["party-animal-score"]
 
-
 # Read JSON-File
 with open("test.json", "r") as read_file:
     animals = json.load(read_file)
 
-# Solution
+# Get rid of animals with negative score and construct a tree
 candidates = [x for x in animals if _getPartyScore(x) > 0]
-candidates.sort(key=_getPartyScore, reverse=True)
+def constructTree(i, root):
 
-rulers = set()
-solution = []
-for x in candidates:
-    if _getRuler(x) is None:
-        continue
-    if _getRuler(x) not in solution:
-        rulers.add(_getRuler(x))
-        solution.append(_getName(x))
+    if i >= len(candidates):
+        return root
+
+    curr = root
+    for animal in candidates:
+        if _getRuler(animal) == root.name:
+            child = Node(_getName(animal), _getRuler(animal), _getPartyScore(animal))
+            curr.addChildren(child)
+            constructTree(i+1, child)
+        
+root = Node(_getName(candidates[0]), _getRuler(candidates[0]), _getPartyScore(candidates[0]))
+constructTree(0, root)
+
+
+
+# """
+# Old non-optimal solution
+# """
+# candidates.sort(key=_getPartyScore, reverse=True)
+# rulers = set()
+# solution = []
+# for x in candidates:
+#     if _getRuler(x) is None:
+#         continue
+#     if _getRuler(x) not in solution:
+#         rulers.add(_getRuler(x))
+#         solution.append(_getName(x))
 
 
 
