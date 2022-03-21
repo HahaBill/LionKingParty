@@ -91,24 +91,35 @@ class LionKingParty:
         constructTree(0, root)
 
         # Searching for optimal solution to have best-sum score
-        def depthFirst(tree):
+        def depthFirst(tree, not_allowed):
             result = set()
             if len(tree.children) == 0:
                 return result
 
             goodChildren = _filterOutNegative(tree.children)
+            if(tree in not_allowed):
+                for x in tree.children:
+                    result.add(x.name)
+                    temp_res = depthFirst(x, not_allowed)
+                    result = result.union(temp_res)
+
+                    goodChildren = _filterOutNegative(x.children)
+                    if x.score < _calculateChildrenScore(goodChildren) and x.name in result:
+                        result.remove(x.name)
+
             if tree.score > _calculateChildrenScore(goodChildren):
-                if(tree.score > 0):
+                if(tree.score > 0 and tree not in not_allowed):
                     result.add(tree.name)
                 for x in tree.children:
-                    temp_res = depthFirst(x)
+                    not_allowed.add(x)
+                    temp_res = depthFirst(x, not_allowed)
                     result = result.union(temp_res)
                 return result
             else:
                 for x in tree.children:
                     if(x.score > 0):
                         result.add(x.name)
-                    temp_res = depthFirst(x)
+                    temp_res = depthFirst(x, not_allowed)
                     result = result.union(temp_res)
 
                     goodChildren = _filterOutNegative(x.children)
@@ -117,7 +128,7 @@ class LionKingParty:
 
                 return result
 
-        solution = depthFirst(root)
+        solution = depthFirst(root, set())
         for x in solution:
             print(x)
 
