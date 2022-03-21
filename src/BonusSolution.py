@@ -47,7 +47,8 @@ candidates = [x for x in animals if _getPartyScore(x) > 0]
 candidates.sort(key=_getPartyScore, reverse=True)
 
 rulers = set()
-solution = []
+solution = [_getName(x) for x in animals if _getRuler(x) is None]
+rulers.add(solution[0])
 for x in candidates:
     if _getRuler(x) is None:
         continue
@@ -55,6 +56,8 @@ for x in candidates:
         rulers.add(_getRuler(x))
         solution.append(_getName(x))
 
+for x in solution:
+    print(x)
 
 
 
