@@ -24,8 +24,19 @@ RULES :
 5. For bonus points: ensure that your solution always invites the main ruler.
 """
 
+def _getPartyScore(x):
+    "Get party score of particular animal"
+    return x["party-animal-score"]
+
+
 # Read JSON-File
 with open("test.json", "r") as read_file:
     animals = json.load(read_file)
+
+# Solution
+candidates = [x for x in animals if _getPartyScore(x) > 0]
+candidates.sort(key=_getPartyScore, reverse=True)
+
+
 
 
