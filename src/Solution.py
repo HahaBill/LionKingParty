@@ -1,4 +1,5 @@
 import json
+import argparse
 
 """
 Helper functions
@@ -61,56 +62,74 @@ class Node:
     def addChildren(self, x):
         self.children.append(x)
 
-# Read JSON-File
-with open("test.json", "r") as read_file:
-    animals = json.load(read_file)
+class LionKingParty:
 
-# Create candidates and construct a tree
-candidates = [x for x in animals]
-def constructTree(i, root):
+    def __init__(self, args):
+        self.json_file = args.json_file
 
-    if i >= len(candidates):
-        return root
+    def findSolution(self):
 
-    curr = root
-    for animal in candidates:
-        if _getRuler(animal) == root.name:
-            child = Node(_getName(animal), _getRuler(animal), _getPartyScore(animal))
-            curr.addChildren(child)
-            constructTree(i+1, child)
-        
-root = Node(_getName(candidates[0]), _getRuler(candidates[0]), _getPartyScore(candidates[0]))
-constructTree(0, root)
+        # Read JSON-File
+        with open(self.json_file, "r") as read_file:
+            animals = json.load(read_file)
 
-# Searching for optimal solution to have best-sum score
-def depthFirst(tree):
-    result = set()
-    if len(tree.children) == 0:
-        return result
+        # Create candidates and construct a tree
+        candidates = [x for x in animals]
+        def constructTree(i, root):
 
-    goodChildren = _filterOutNegative(tree.children)
-    if tree.score > _calculateChildrenScore(goodChildren):
-        if(tree.score > 0):
-            result.add(tree.name)
-        for x in tree.children:
-            temp_res = depthFirst(x)
-            result = result.union(temp_res)
-        return result
-    else:
-        for x in tree.children:
-            if(x.score > 0):
-                result.add(x.name)
-            temp_res = depthFirst(x)
-            result = result.union(temp_res)
+            if i >= len(candidates):
+                return root
 
-            goodChildren = _filterOutNegative(x.children)
-            if x.score < _calculateChildrenScore(goodChildren) and x.name in result:
-                result.remove(x.name)
+            curr = root
+            for animal in candidates:
+                if _getRuler(animal) == root.name:
+                    child = Node(_getName(animal), _getRuler(animal), _getPartyScore(animal))
+                    curr.addChildren(child)
+                    constructTree(i+1, child)
+                
+        root = Node(_getName(candidates[0]), _getRuler(candidates[0]), _getPartyScore(candidates[0]))
+        constructTree(0, root)
 
-        return result
+        # Searching for optimal solution to have best-sum score
+        def depthFirst(tree):
+            result = set()
+            if len(tree.children) == 0:
+                return result
 
-solution = depthFirst(root)
-for x in solution:
-    print(x)
+            goodChildren = _filterOutNegative(tree.children)
+            if tree.score > _calculateChildrenScore(goodChildren):
+                if(tree.score > 0):
+                    result.add(tree.name)
+                for x in tree.children:
+                    temp_res = depthFirst(x)
+                    result = result.union(temp_res)
+                return result
+            else:
+                for x in tree.children:
+                    if(x.score > 0):
+                        result.add(x.name)
+                    temp_res = depthFirst(x)
+                    result = result.union(temp_res)
 
+                    goodChildren = _filterOutNegative(x.children)
+                    if x.score < _calculateChildrenScore(goodChildren) and x.name in result:
+                        result.remove(x.name)
+
+                return result
+
+        solution = depthFirst(root)
+        for x in solution:
+            print(x)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='''
+    Script to solve the TheLionKinParty challenge
+    ''')
+    parser.add_argument('--json_file', type=str, default="test.json", required=False,
+                        help='path to the json file')
+
+    args = parser.parse_args()
+    
+    lion_king_party = LionKingParty(args)
+    lion_king_party.findSolution()
 
