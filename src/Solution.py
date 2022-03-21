@@ -65,7 +65,7 @@ class Node:
 with open("test.json", "r") as read_file:
     animals = json.load(read_file)
 
-# Get rid of animals with negative score and construct a tree
+# Create candidates and construct a tree
 candidates = [x for x in animals]
 def constructTree(i, root):
 
