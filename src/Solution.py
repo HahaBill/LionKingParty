@@ -1,6 +1,32 @@
 import json
 
 """
+Helper functions
+"""
+
+def _getName(x):
+    "Get the name of particular animal"
+    return x["name"]
+
+def _getRuler(x):
+    "Get the ruler of particular animal"
+    return x["ruler"]
+
+def _getPartyScore(x):
+    "Get the arty score of particular animal"
+    return x["party-animal-score"]
+
+def _filterOutNegative(animals):
+    "Filter out animals that have negative score"
+    result = [x for x in animals if x.score > 0]
+    return result
+
+def _calculateChildrenScore(children):
+    "Calculate total children sum"
+    score_sum = [x.score for x in children]
+    return sum(score_sum)
+
+"""
 The Lion King Party
 ---------------------------------------------------------------------------------------------------------------------------
 
@@ -34,29 +60,13 @@ class Node:
     
     def addChildren(self, x):
         self.children.append(x)
-    
-    def calculateChildrenScore(self):
-        score_sum = [x.score for x in self.children]
-        return sum(score_sum)
-
-def _getName(x):
-    "Get the name of particular animal"
-    return x["name"]
-
-def _getRuler(x):
-    "Get the ruler of particular animal"
-    return x["ruler"]
-
-def _getPartyScore(x):
-    "Get the arty score of particular animal"
-    return x["party-animal-score"]
 
 # Read JSON-File
 with open("test.json", "r") as read_file:
     animals = json.load(read_file)
 
 # Get rid of animals with negative score and construct a tree
-candidates = [x for x in animals if _getPartyScore(x) > 0]
+candidates = [x for x in animals]
 def constructTree(i, root):
 
     if i >= len(candidates):
@@ -72,22 +82,35 @@ def constructTree(i, root):
 root = Node(_getName(candidates[0]), _getRuler(candidates[0]), _getPartyScore(candidates[0]))
 constructTree(0, root)
 
+# Searching for optimal solution to have best-sum score
+def depthFirst(tree):
+    result = set()
+    if len(tree.children) == 0:
+        return result
 
+    goodChildren = _filterOutNegative(tree.children)
+    if tree.score > _calculateChildrenScore(goodChildren):
+        if(tree.score > 0):
+            result.add(tree.name)
+        for x in tree.children:
+            temp_res = depthFirst(x)
+            result = result.union(temp_res)
+        return result
+    else:
+        for x in tree.children:
+            if(x.score > 0):
+                result.add(x.name)
+            temp_res = depthFirst(x)
+            result = result.union(temp_res)
 
-# """
-# Old non-optimal solution
-# """
-# candidates.sort(key=_getPartyScore, reverse=True)
-# rulers = set()
-# solution = []
-# for x in candidates:
-#     if _getRuler(x) is None:
-#         continue
-#     if _getRuler(x) not in solution:
-#         rulers.add(_getRuler(x))
-#         solution.append(_getName(x))
+            goodChildren = _filterOutNegative(x.children)
+            if x.score < _calculateChildrenScore(goodChildren) and x.name in result:
+                result.remove(x.name)
 
+        return result
 
-
+solution = depthFirst(root)
+for x in solution:
+    print(x)
 
 
